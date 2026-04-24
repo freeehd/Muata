@@ -1,0 +1,88 @@
+@import url('https://fonts.googleapis.com/css2?family=Lexend:wght@400;700;800;900&family=Space+Grotesk:wght@400;500;700&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --color-surface: #121414;
+  --color-surface-dim: #121414;
+  --color-surface-bright: #38393a;
+  --color-surface-container-lowest: #0d0e0f;
+  --color-surface-container-low: #1a1c1c;
+  --color-surface-container: #1e2020;
+  --color-surface-container-high: #282a2b;
+  --color-surface-container-highest: #333535;
+  --color-on-surface: #e2e2e2;
+  --color-on-surface-variant: #bac9c9;
+  --color-inverse-surface: #e2e2e2;
+  --color-inverse-on-surface: #2f3131;
+  --color-outline: #859493;
+  --color-outline-variant: #3b4949;
+  --color-surface-tint: #2ddbde;
+  --color-primary: #47eaed;
+  --color-on-primary: #003738;
+  --color-primary-container: #00ced1;
+  --color-on-primary-container: #005354;
+  --color-inverse-primary: #00696b;
+  --color-secondary: #ffb5a0;
+  --color-on-secondary: #601400;
+  --color-secondary-container: #ff5625;
+  --color-on-secondary-container: #541100;
+  --color-tertiary: #d7d4d4;
+  --color-on-tertiary: #313030;
+  --color-tertiary-container: #bbb9b8;
+  --color-on-tertiary-container: #4a4949;
+  --color-background: #121414;
+  --color-on-background: #e2e2e2;
+  --color-surface-variant: #333535;
+
+  --font-sans: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Lexend", sans-serif;
+  --font-mono: 'Courier New', Courier, monospace;
+}
+
+@layer base {
+  body {
+    @apply bg-background text-on-background font-sans;
+    background-image: radial-gradient(#3b4949 1px, transparent 1px);
+    background-size: 24px 24px;
+    background-attachment: fixed;
+  }
+}
+
+.tech-grid {
+  background-image: radial-gradient(#3b4949 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+.blueprint-grid {
+  background-image: 
+    linear-gradient(to right, rgba(133, 148, 147, 0.05) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(133, 148, 147, 0.05) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+.segmented-bar {
+  height: 8px;
+  background: repeating-linear-gradient(90deg, #47eaed, #47eaed 8px, transparent 8px, transparent 12px);
+}
+
+.segmented-bar-alert {
+  height: 8px;
+  background: repeating-linear-gradient(90deg, #ff5625, #ff5625 8px, transparent 8px, transparent 12px);
+}
+
+.border-tech {
+  border: 1px solid #3b4949;
+}
+
+.chamfer {
+  clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 0 100%);
+}
+
+.chamfer-large {
+  clip-path: polygon(0 0, calc(100% - 30px) 0, 100% 30px, 100% 100%, 30px 100%, 0 calc(100% - 30px));
+}
+
+.perspective-1000 {
+  perspective: 1000px;
+}
+
