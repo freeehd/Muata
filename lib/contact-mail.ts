@@ -50,16 +50,28 @@ export const parseContactSubmission = (body: unknown) => {
 
 const readEnv = (env: NodeJS.ProcessEnv, name: string) => env[name]?.trim() || '';
 
-const hasSmtpConfig = (env: NodeJS.ProcessEnv) =>
-  Boolean(readEnv(env, 'SMTP_HOST') && readEnv(env, 'SMTP_USER') && readEnv(env, 'SMTP_PASS') && readEnv(env, 'CONTACT_TO_EMAIL'));
+const requiredSmtpEnvVars = ['SMTP_HOST', 'SMTP_USER', 'SMTP_PASS', 'CONTACT_TO_EMAIL'] as const;
+const readMailMode = (env: NodeJS.ProcessEnv) => readEnv(env, 'CONTACT_MAIL_MODE').toLowerCase();
+
+const getMissingEnvVars = (env: NodeJS.ProcessEnv) =>
+  requiredSmtpEnvVars.filter((name) => !readEnv(env, name));
+
+const isProductionEnv = (env: NodeJS.ProcessEnv) =>
+  readEnv(env, 'NODE_ENV') === 'production' || readEnv(env, 'VERCEL_ENV') === 'production';
 
 export const createContactMailer = (env: NodeJS.ProcessEnv = process.env): ContactMailer => {
   const fromName = readEnv(env, 'CONTACT_FROM_NAME') || 'Muata Portfolio';
   const subjectPrefix = readEnv(env, 'CONTACT_SUBJECT_PREFIX') || '[Muata Portfolio]';
   const smtpSecure = readEnv(env, 'SMTP_SECURE').toLowerCase() === 'true';
   const toEmail = readEnv(env, 'CONTACT_TO_EMAIL');
+  const mailMode = readMailMode(env);
+  const missingEnvVars = getMissingEnvVars(env);
 
-  if (hasSmtpConfig(env)) {
+  if (mailMode === 'smtp') {
+    if (missingEnvVars.length > 0) {
+      throw new Error(`Missing SMTP env vars: ${missingEnvVars.join(', ')}.`);
+    }
+
     const smtpHost = readEnv(env, 'SMTP_HOST');
     const smtpPort = Number(readEnv(env, 'SMTP_PORT') || '587');
     const smtpUser = readEnv(env, 'SMTP_USER');
@@ -88,8 +100,8 @@ export const createContactMailer = (env: NodeJS.ProcessEnv = process.env): Conta
     };
   }
 
-  if ((readEnv(env, 'NODE_ENV') || readEnv(env, 'VERCEL')) === 'production') {
-    throw new Error('SMTP configuration is required in production.');
+  if (isProductionEnv(env) && mailMode !== 'development') {
+    throw new Error('Set CONTACT_MAIL_MODE=smtp and provide SMTP env vars in production.');
   }
 
   return {
@@ -139,7 +151,7 @@ export const sendContactSubmission = async (env: NodeJS.ProcessEnv, submission: 
   return {
     message:
       mailer.mode === 'development'
-        ? 'Development mode: message captured locally. Add SMTP env vars to send real emails.'
+        ? 'Development mode: message captured locally. Set CONTACT_MAIL_MODE=smtp and add SMTP env vars to send real emails.'
         : 'Message sent successfully.',
   };
 };
