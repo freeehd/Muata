@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { motion } from 'motion/react';
 import { useSearchParams } from 'react-router-dom';
 import { Mail, Linkedin, Github, Twitch, Download, Send, MapPin } from 'lucide-react';
@@ -9,6 +9,20 @@ const RESUME_FILENAME = 'Mohammed_Muatasim_Resume.pdf';
 export default function Contact() {
   const [searchParams] = useSearchParams();
   const prefilledMessage = searchParams.get('message') || '';
+  const [form, setForm] = useState({
+    name: '',
+    email: '',
+    subject: '',
+    message: prefilledMessage,
+  });
+  const [status, setStatus] = useState<{ type: 'idle' | 'sending' | 'success' | 'error'; message: string }>({
+    type: 'idle',
+    message: '',
+  });
+
+  useEffect(() => {
+    setForm((current) => (current.message ? current : { ...current, message: prefilledMessage }));
+  }, [prefilledMessage]);
 
   const handleResumeDownload = async (event: React.MouseEvent<HTMLAnchorElement>) => {
     event.preventDefault();
@@ -29,6 +43,38 @@ export default function Contact() {
     link.click();
     link.remove();
     window.setTimeout(() => window.URL.revokeObjectURL(objectUrl), 1000);
+  };
+
+  const handleChange = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = event.target;
+    setForm((current) => ({ ...current, [name]: value }));
+  };
+
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setStatus({ type: 'sending', message: 'Transmitting message...' });
+
+    const response = await fetch('/api/contact', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(form),
+    });
+
+    const payload = (await response.json().catch(() => null)) as { error?: string; message?: string } | null;
+
+    if (!response.ok) {
+      throw new Error(payload?.error || 'Failed to send message.');
+    }
+
+    setForm({
+      name: '',
+      email: '',
+      subject: '',
+      message: '',
+    });
+    setStatus({ type: 'success', message: payload?.message || 'Message sent successfully.' });
   };
 
   return (
@@ -105,38 +151,94 @@ export default function Contact() {
 
         {/* Message Form Placeholder / More Info */}
         <div className="lg:col-span-7">
-          <form className="border-tech bg-[#1a1c1c] p-8 flex flex-col gap-6 relative">
+          <form
+            className="border-tech bg-[#1a1c1c] p-8 flex flex-col gap-6 relative"
+            onSubmit={(event) => {
+              handleSubmit(event).catch((error: unknown) => {
+                setStatus({
+                  type: 'error',
+                  message: error instanceof Error ? error.message : 'Failed to send message.',
+                });
+              });
+            }}
+          >
             <div className="absolute top-0 right-0 w-32 h-32 tech-grid opacity-10 pointer-events-none"></div>
             <h3 className="text-xl font-bold text-white uppercase italic mb-2 tracking-tight">Transmission Buffer</h3>
+
+            {status.type !== 'idle' && (
+              <div
+                className={`border px-4 py-3 text-xs font-mono uppercase tracking-wide ${
+                  status.type === 'success'
+                    ? 'border-secondary-container text-secondary-container'
+                    : status.type === 'error'
+                      ? 'border-red-400 text-red-300'
+                      : 'border-primary text-primary'
+                }`}
+                aria-live="polite"
+              >
+                {status.message}
+              </div>
+            )}
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="flex flex-col gap-2">
-                <label className="text-[10px] font-mono text-on-surface-variant uppercase">Operator_Name</label>
-                <input type="text" className="bg-[#333535] border-tech py-3 px-4 text-white font-mono text-xs focus:outline-none focus:border-primary" placeholder="IDENTIFY..." />
+                <label htmlFor="contact-name" className="text-[10px] font-mono text-on-surface-variant uppercase">Operator_Name</label>
+                <input
+                  id="contact-name"
+                  name="name"
+                  type="text"
+                  className="bg-[#333535] border-tech py-3 px-4 text-white font-mono text-xs focus:outline-none focus:border-primary"
+                  placeholder="IDENTIFY..."
+                  value={form.name}
+                  onChange={handleChange}
+                  required
+                />
               </div>
               <div className="flex flex-col gap-2">
-                <label className="text-[10px] font-mono text-on-surface-variant uppercase">Uplink_Email</label>
-                <input type="email" className="bg-[#333535] border-tech py-3 px-4 text-white font-mono text-xs focus:outline-none focus:border-primary" placeholder="EMAIL@DOMAIN.COM" />
+                <label htmlFor="contact-email" className="text-[10px] font-mono text-on-surface-variant uppercase">Uplink_Email</label>
+                <input
+                  id="contact-email"
+                  name="email"
+                  type="email"
+                  className="bg-[#333535] border-tech py-3 px-4 text-white font-mono text-xs focus:outline-none focus:border-primary"
+                  placeholder="EMAIL@DOMAIN.COM"
+                  value={form.email}
+                  onChange={handleChange}
+                  required
+                />
               </div>
             </div>
 
             <div className="flex flex-col gap-2">
-              <label className="text-[10px] font-mono text-on-surface-variant uppercase">Protocol_Subject</label>
-              <input type="text" className="bg-[#333535] border-tech py-3 px-4 text-white font-mono text-xs focus:outline-none focus:border-primary" placeholder="RE: INQUIRY..." />
+              <label htmlFor="contact-subject" className="text-[10px] font-mono text-on-surface-variant uppercase">Protocol_Subject</label>
+              <input
+                id="contact-subject"
+                name="subject"
+                type="text"
+                className="bg-[#333535] border-tech py-3 px-4 text-white font-mono text-xs focus:outline-none focus:border-primary"
+                placeholder="RE: INQUIRY..."
+                value={form.subject}
+                onChange={handleChange}
+                required
+              />
             </div>
 
             <div className="flex flex-col gap-2">
-              <label className="text-[10px] font-mono text-on-surface-variant uppercase">Message_Payload</label>
+              <label htmlFor="contact-message" className="text-[10px] font-mono text-on-surface-variant uppercase">Message_Payload</label>
               <textarea 
+                id="contact-message"
+                name="message"
                 rows={6} 
                 className="bg-[#333535] border-tech py-3 px-4 text-white font-mono text-xs focus:outline-none focus:border-primary resize-none" 
                 placeholder="START TRANSMISSION..."
-                defaultValue={prefilledMessage}
-              ></textarea>
+                value={form.message}
+                onChange={handleChange}
+                required
+              />
             </div>
 
-            <button className="chamfer bg-primary text-black font-black uppercase text-xs py-4 flex items-center justify-center gap-2 group mt-4">
-              SEND MESSAGE <Send size={16} className="group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
+            <button className="chamfer bg-primary text-black font-black uppercase text-xs py-4 flex items-center justify-center gap-2 group mt-4" disabled={status.type === 'sending'}>
+              {status.type === 'sending' ? 'SENDING...' : <>SEND MESSAGE <Send size={16} className="group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" /></>}
             </button>
           </form>
         </div>
