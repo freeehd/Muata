@@ -64,7 +64,7 @@ export default function Portrait() {
         {/* The Image */}
         <div className="w-full h-full chamfer-large overflow-hidden border-2 border-primary/10 relative bg-[#0d0e0f]">
           <motion.img 
-            src="/public/me.webp"
+            src="/me.webp"
             alt="Mohammed Muatasim Siddig"
             className="w-full h-full object-cover grayscale brightness-75 contrast-125"
             animate={{ 
