@@ -26,8 +26,15 @@ app.post('/api/contact', async (req: Request, res: Response) => {
     return res.status(400).json({ error: parsed.error });
   }
 
-  const result = await sendContactSubmission(process.env, parsed.submission);
-  return res.status(200).json(result);
+  try {
+    const result = await sendContactSubmission(process.env, parsed.submission);
+    return res.status(200).json(result);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Failed to send message.';
+    const stack = error instanceof Error ? error.stack : '';
+    console.error('Contact form error:', message, stack);
+    return res.status(500).json({ error: message });
+  }
 });
 
 app.use('/api', (_req, res) => {

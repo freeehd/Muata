@@ -33,6 +33,8 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
     return sendJson(res, 200, result);
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Failed to send message.';
+    const stack = error instanceof Error ? error.stack : '';
+    console.error('Contact form error:', message, stack);
     return sendJson(res, 500, { error: message });
   }
 }
