@@ -1,6 +1,6 @@
 import type { IncomingMessage, ServerResponse } from 'node:http';
 
-import { parseContactSubmission, sendContactSubmission } from '../lib/contact-mail.ts';
+import { parseContactSubmission, sendContactSubmission } from '../lib/contact-mail.js';
 
 type ApiRequest = IncomingMessage & {
   method?: string;
