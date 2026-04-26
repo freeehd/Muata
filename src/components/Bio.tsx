@@ -114,7 +114,7 @@ export default function Bio() {
             issuer="IBM" 
             id="IBM-SYS-V1"
             certs={[
-              { title: "IBM Introduction to Cloud Computing", year: "2024" },
+              { title: "Introduction to Cloud Computing", year: "2024" },
               { title: "Exploratory Data Analysis for ML", year: "2025" },
               { title: "Supervised ML: Regression", year: "2025" },
               { title: "Supervised ML: Classification", year: "2026" },
