@@ -130,6 +130,7 @@ export default function Bio() {
               certs={[
                 { title: "Google Python Course", year: "2024" },
                 { title: "Python & OS Interaction", year: "2024" },
+                { title: "Technical Support Fundamentals", year: "2026" },
               ]} 
             />
             <IssuerBlock 
